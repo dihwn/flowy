@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flowy — Музыка с кристальным звуком</title>
+    
+    <!-- Meta tags for social previews / OpenGraph -->
+    <meta property="og:title" content="Слушайте трек в Flowy">
+    <meta property="og:description" content="Откройте трек в приложении Flowy с динамическим светом и максимальным качеством звука.">
+    <meta property="og:type" content="music.song">
+    <meta name="theme-color" content="#0c0c0e">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #0c0c0e;
+            --surface-color: rgba(22, 22, 28, 0.72);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-gold: #ffd54f;
+            --accent-gold-glow: rgba(255, 213, 79, 0.28);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Lighting Auras */
+        .ambient-glow-1 {
+            position: absolute;
+            top: -15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 420px;
+            height: 420px;
+            background: radial-gradient(circle, rgba(255, 213, 79, 0.16) 0%, rgba(255, 213, 79, 0.02) 65%, transparent 80%);
+            filter: blur(60px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            bottom: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+            filter: blur(70px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Main Container */
+        .bridge-container {
+            width: 100%;
+            max-width: 420px;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Brand Header */
+        .brand-header {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-badge {
+            width: 68px;
+            height: 68px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #1e212b 0%, #121319 100%);
+            border: 1px solid rgba(255, 213, 79, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 0 24px var(--accent-gold-glow);
+            position: relative;
+        }
+
+        .logo-badge svg {
+            width: 34px;
+            height: 34px;
+            fill: var(--accent-gold);
+        }
+
+        .brand-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(180deg, #ffffff 30%, #ffd54f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-tagline {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Frosted Glass Card */
+        .glass-card {
+            background: var(--surface-color);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* Track Info Banner */
+        .track-status-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* Sound Wave Animation */
+        .wave-anim {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            height: 24px;
+            padding: 0 4px;
+        }
+
+        .wave-bar {
+            width: 3.5px;
+            background: var(--accent-gold);
+            border-radius: 3px;
+            animation: bounce 1.2s ease-in-out infinite alternate;
+        }
+
+        .wave-bar:nth-child(1) { height: 10px; animation-delay: 0.1s; }
+        .wave-bar:nth-child(2) { height: 22px; animation-delay: 0.3s; }
+        .wave-bar:nth-child(3) { height: 16px; animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { height: 12px; animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0% { transform: scaleY(0.35); }
+            100% { transform: scaleY(1); }
+        }
+
+        .track-meta {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .track-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-sub {
+            font-size: 13px;
+            color: var(--accent-gold);
+            font-weight: 500;
+        }
+
+        /* Action Buttons */
+        .btn {
+            width: 100%;
+            height: 52px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-gold);
+            color: #0f172a;
+            box-shadow: 0 8px 24px rgba(255, 213, 79, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 12px rgba(255, 213, 79, 0.2);
+        }
+
+        .btn-primary svg {
+            width: 20px;
+            height: 20px;
+            fill: #0f172a;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .btn-secondary svg {
+            width: 20px;
+            height: 20px;
+            fill: #ffffff;
+        }
+
+        /* Fallback Card */
+        .fallback-card {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .fallback-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .fallback-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fallback-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fallback-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--accent-gold);
+        }
+
+        .fallback-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .fallback-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .btn-telegram {
+            background: rgba(41, 169, 234, 0.15);
+            color: #29b6f6;
+            border: 1px solid rgba(41, 169, 234, 0.25);
+            height: 46px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-telegram svg {
+            width: 18px;
+            height: 18px;
+            fill: #29b6f6;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div class="bridge-container">
+        <!-- Brand Header -->
+        <div class="brand-header">
+            <div class="logo-badge">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                </svg>
+            </div>
+            <h1 class="brand-name">Flowy</h1>
+            <p class="brand-tagline">Премиальный музыкальный плеер</p>
+        </div>
+
+        <!-- Glass Action Card -->
+        <div class="glass-card">
+            <div class="track-status-box" id="trackBox">
+                <div class="wave-anim">
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                </div>
+                <div class="track-meta">
+                    <span class="track-title" id="trackTitle">Подключение к треку...</span>
+                    <span class="track-sub" id="trackSub">Запуск приложения Flowy</span>
+                </div>
+            </div>
+
+            <!-- Primary Action Button -->
+            <button class="btn btn-primary" id="openAppBtn" onclick="launchApp()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <span>Открыть в приложении</span>
+            </button>
+
+            <!-- Fallback Section (Appears after 1.5s if not redirected) -->
+            <div class="fallback-card" id="fallbackCard" style="display: none;">
+                <div class="fallback-header">
+                    <div class="fallback-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h4v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-4.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.85 2.23 12.95 2 12 2c-.96 0-1.86.23-2.66.63L7.85.99c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31C6.97 3.9 6 5.83 6 8h12c0-2.17-.97-4.1-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/>
+                        </svg>
+                    </div>
+                    <span class="fallback-title">Flowy не установлен?</span>
+                </div>
+                <p class="fallback-desc">
+                    Установите Flowy на свой Android, чтобы слушать музыку с кристальным звуком, динамическим светом и без рекламы.
+                </p>
+
+                <!-- Download APK Button -->
+                <a class="btn btn-secondary" id="downloadApkBtn" href="https://github.com/dihwn/flowy/releases/latest" target="_blank">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                    </svg>
+                    <span>Скачать Flowy (APK)</span>
+                </a>
+
+                <!-- Telegram Community Button -->
+                <a class="btn btn-telegram" href="https://t.me/flowymusic" target="_blank">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                    </svg>
+                    <span>Telegram-канал приложения</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Flowy Web Bridge &bull; <a href="https://github.com/dihwn/flowy" target="_blank">GitHub</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Парсинг параметров URL
+        const urlParams = new URLSearchParams(window.location.search);
+        let trackId = urlParams.get('track');
+        if (trackId && trackId.includes(':')) {
+            trackId = trackId.split(':')[0];
+        }
+
+        const trackTitleEl = document.getElementById('trackTitle');
+        const trackSubEl = document.getElementById('trackSub');
+        const fallbackCard = document.getElementById('fallbackCard');
+
+        if (trackId) {
+            trackTitleEl.innerText = "Трек #" + trackId;
+            trackSubEl.innerText = "Открытие в Flowy...";
+        } else {
+            trackTitleEl.innerText = "Музыкальный плеер Flowy";
+            trackSubEl.innerText = "Готов к воспроизведению";
+        }
+
+        // Построение ссылок для Android Intent и Custom Scheme
+        function getLaunchUrls() {
+            if (trackId) {
+                return {
+                    // Поддержка основного пакета ru.flowy.music, а также fallback
+                    intent: `intent://track/${encodeURIComponent(trackId)}#Intent;scheme=flowy;package=ru.flowy.music;end;`,
+                    scheme: `flowy://track/${encodeURIComponent(trackId)}`
+                };
+            } else {
+                return {
+                    intent: `intent://track/#Intent;scheme=flowy;package=ru.flowy.music;end;`,
+                    scheme: `flowy://`
+                };
+            }
+        }
+
+        let hasLeftPage = false;
+
+        function markAppOpened() {
+            hasLeftPage = true;
+        }
+
+        window.addEventListener('pagehide', markAppOpened);
+        window.addEventListener('blur', markAppOpened);
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) markAppOpened();
+        });
+
+        function launchApp() {
+            const urls = getLaunchUrls();
+            const isAndroid = /Android/i.test(navigator.userAgent);
+
+            if (isAndroid) {
+                // Для Chrome на Android: intent URI надежно передает управление в ru.flowy.music
+                window.location.href = urls.intent;
+                
+                // Fallback через scheme через 300мс
+                setTimeout(() => {
+                    if (!hasLeftPage && !document.hidden) {
+                        window.location.href = urls.scheme;
+                    }
+                }, 300);
+            } else {
+                // Для других браузеров или десктопа
+                window.location.href = urls.scheme;
+            }
+        }
+
+        // Автоматическая попытка запуска при открытии страницы
+        window.addEventListener('DOMContentLoaded', () => {
+            // Мгновенный запуск
+            launchApp();
+
+            // Таймер 1.5 секунды: проверка, перехватило ли приложение фокус
+            setTimeout(() => {
+                if (!hasLeftPage && !document.hidden) {
+                    fallbackCard.style.display = 'flex';
+                    // Плавное проявление
+                    setTimeout(() => {
+                        fallbackCard.classList.add('visible');
+                    }, 20);
+                    trackSubEl.innerText = "Приложение не найдено на устройстве";
+                }
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
